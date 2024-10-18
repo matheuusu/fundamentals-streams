@@ -1,39 +1,25 @@
 import { createServer } from "node:http"
 import { json } from "./middlewares/json.js"
-import { Database } from "./database.js"
-import { randomUUID } from "node:crypto"
-
-const database = new Database()
+import { routes } from "./routes.js"
 
 const server = createServer(async (request, response) => {
   const { method, url } = request
 
   await json(request, response)
 
-  if (method === "GET" && url === "/users") {
-    const users = database.select('users')
+  const route = routes.find(route => {
+    return route.method === method && route.path.test(url)
+  })
 
-    return response
-      .end(JSON.stringify(users))
+  if (route) {
+    const routeParams = request.url.match(route.path)
+
+    request.params = { ...routeParams.groups }
+
+    return route.handler(request, response)
   }
 
-  if (method === "POST" && url === "/users") {
-    const { name, email } = request.body
-
-    const user = {
-      id: randomUUID(),
-      name,
-      email
-    }
-
-    database.insert('users', user)
-
-    return response
-      .writeHead(201)
-      .end(JSON.stringify({ message: "The user has ben created" }))
-  }
-
-  return response.writeHead(404).end()
+  return response.writeHead(404).end("The route is not found")
 })
 
 server.listen(3333, () => {

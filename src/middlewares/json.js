@@ -12,5 +12,4 @@ export async function json(request, response) {
   }
 
   response.setHeader("Content-Type", "application/json")
-
 }

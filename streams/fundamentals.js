@@ -36,5 +36,3 @@ class MultiplyByTenStream extends Writable {
 new OneToHundredStream()
   .pipe(new InverseNumberStream())
   .pipe(new MultiplyByTenStream())
-
-// 0800 723 9008
